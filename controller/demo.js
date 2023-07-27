@@ -1,7 +1,3 @@
-
-
-
-
 const { patient } = require("../model/patient");
 const { Doctors } = require("../model/doctor");
 const { staffs } = require("../model/staff");
@@ -23,27 +19,25 @@ cloudinary.config({
 const API_KEY =
   "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";
 sgMail.setApiKey(API_KEY);
-
-
+const {createPatientSchema}=require("../validation/patient")
 
 
 
 // insert patient
 const addpatient = async (req, res) => {
   try {
-    //console.log(req.file)
-    const addpatient = new patient({
-      // making object for patient to store all info
 
+    await createPatientSchema.validateAsync(req.body)   //create patient schema for JOI
+    const addpatient = new patient({            // making object for patient to store all info
       patientName: req.body.patientName,
+      password: req.body.password,
       patient_id: req.body.patient_id,
       digonosis: req.body.digonosis,
       bed_id: req.body.bed_id,
       medication_id: req.body.medication_id,
-
       medication: req.body.medication,
       admitted_id: req.body.admitted_id,
-      discharged_id: req.body.discharged_id,
+      discharged_id: req.body.discharged_id
     });
     let insertpatient = await addpatient.save();
     res.send(insertpatient);
@@ -54,20 +48,15 @@ const addpatient = async (req, res) => {
 };
 
 //all patient
-
 const allpatient = async (req, res) => {
   try {
     const allpatient= await patient.find({})
-    // console.log(allpatient)
     res.send({allpatient});
     
   } catch (e) {
     console.log(e);
     res.send(e);
-    //res.status(500).send({ error: 'An error occurred while fetching the patient count.' });
-  }
-
-  }
+     }}
 
 
 //delete patient
@@ -136,36 +125,12 @@ const addDoctor = async (req, res) => {
   }
 };
 
-//allDoctor
-
-/*const allDoctor = async (req, res) => {
-  try {
-    const allDoctor = await Doctors.find({$and:[{doctorName:"Sidra"},
-    {qualification:"mbbs"}]}
-    .select({doctorName:1})
-  )
-    console.log(allDoctor)
-    res.send(allDoctor);
-  } catch (e) {
-    console.log(e);
-    res.send(e);
-  }
-};*/
 const allDoctor = async (req, res) => {
   try {
     const allDoctor = await Doctors.find({"doctorName": { $ne:"Sidra"}})
-    //.select({doctorName:2})
-   // .count({doctorName:1})
-   //.limit(5)
-   //.skip(5)
-   //.distinct("doctor_id")
+    
     console.log(allDoctor)
-    /*res.send(allDoctor);
-  } catch (e) {
-    console.log(e);
-    res.send(e);
-  }
-};*/
+    
 res.status(200).send(String(allDoctor)); // Use res.status(200) and convert alldoctor to a string before sending
 
   } catch (e) {
@@ -371,21 +336,6 @@ const uploadImageHandler = async (req, res) => {
     res.status(500).send('Something went wrong.');
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 module.exports = {
   addpatient,
   updatepatient,
@@ -402,9 +352,5 @@ module.exports = {
   uploadImage, 
   imageuser, 
   uploadImageHandler,
-
-  
-  
-  
-  };
+};
   

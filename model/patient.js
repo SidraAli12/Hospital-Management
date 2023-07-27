@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
@@ -10,8 +9,12 @@ const patient_schema = new mongoose.Schema({
     },
 
     patient_id:{
-        type:Number,
+       type:Number,
         required :true},
+
+        password:{
+            type:String,
+            required :true},
 
         medication_id:{
             type:Number,
@@ -29,12 +32,12 @@ const patient_schema = new mongoose.Schema({
                     required :true},
      
                     discharged_id:{
-                        type:String,
+                        type:Number,
                         required :true},
 
                         medication:{
                             type:String,
-                            required :true},
+                            required :true}
 
                     
                     

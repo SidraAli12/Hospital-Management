@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path= require("path")
-//const __dirname = path.resolve();
+
 
 const options = {
 	definition: {

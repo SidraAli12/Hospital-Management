@@ -1,7 +1,7 @@
-//mongodb://localhost:27017
+
 require('dotenv').config();
 const mongoose = require("mongoose");
-//const fileupload=require('express-fileupload')
+
 mongoose.set('strictQuery', true);
 const express = require('express');
 

@@ -1,5 +1,4 @@
 const {staff} = require("../model/staff")
-//const {user} =require("../model/user")
 checkDuplicateEmail = async(req, res, next) => {
     let data = await staff.findOne({
         email: req.body.email
