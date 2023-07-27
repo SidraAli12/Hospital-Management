@@ -1,4 +1,9 @@
-const Joi = require('joi');
+const Joi = require('joi');  
+
+
+
+
+
 const createPatientSchema = Joi.object({
     patientName: Joi.string().min(3).max(20).required(),
     patient_id: Joi.number().required(),
