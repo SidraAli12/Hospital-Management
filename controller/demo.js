@@ -14,12 +14,12 @@ var { ObjectId } = require("mongodb");
 cloudinary.config({
   cloud_name: "dvotj8eok",
   api_key: "349473895281936",
-  api_secret: "vKDb5b56gTmpn4PSauTJydiP4nA"
-});
-const API_KEY =
-  "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";
-sgMail.setApiKey(API_KEY);
+  });
+
+
 const {createPatientSchema}=require("../validation/patient")
+const {createDoctorSchema}=require("../validation/doctor")
+
 
 
 
@@ -90,13 +90,14 @@ const updatepatient = async (req, res) => {
 
 const addDoctor = async (req, res) => {
   try {
+    await createDoctorSchema.validateAsync(req.body)
     const addDoctor = new Doctors({
       doctorName: req.body.doctorName,
       doctor_id: req.body.doctor_id,
       qualification: req.body.qualification,
       email: req.body.email,
       specialist: req.body.specialist,
-      salary: req.body.salary,
+      salary: req.body.salary
     });
 
     let insertDoctor = await addDoctor.save();
