@@ -3,23 +3,16 @@ const { Doctors } = require("../model/doctor");
 const { staffs } = require("../model/staff");
 const { user } = require("../model/user");
 const sgMail = require("@sendgrid/mail");
-const accountSid = 'ACd40dea08b1a7b71b64f4ea4be94d19b3';
 const authToken = 'a55bbb534f05b58a01b3faa8b2f27e1f';
+const accountSid = 'ACd40dea08b1a7b71b64f4ea4be94d19b3';
 const client = require('twilio')(accountSid, authToken);
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const cloudinary=require('cloudinary').v2
 var { ObjectId } = require("mongodb");
-cloudinary.config({
-  cloud_name: "dvotj8eok",
-  api_key: "349473895281936",
-  api_secret: "vKDb5b56gTmpn4PSauTJydiP4nA"
-});
-const API_KEY =
-  "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";
-sgMail.setApiKey(API_KEY);
 const {createPatientSchema}=require("../validation/patient")
+const {createdoctorSchema}=require("../validation/doctor")
 
 
 
@@ -27,8 +20,8 @@ const {createPatientSchema}=require("../validation/patient")
 const addpatient = async (req, res) => {
   try {
 
-    await createPatientSchema.validateAsync(req.body)   //create patient schema for JOI
-    const addpatient = new patient({            // making object for patient to store all info
+    await createPatientSchema.validateAsync(req.body)  
+    const addpatient = new patient({            
       patientName: req.body.patientName,
       password: req.body.password,
       patient_id: req.body.patient_id,
@@ -78,7 +71,7 @@ const updatepatient = async (req, res) => {
   try {
     let _id = req.query.id;
     const getstdspe = await patient.findByIdAndUpdate(_id, req.body, {
-      new: true, //new updated value usi waqt mil jae uskay liye kia hay
+      new: true, 
     });
     res.send(getstdspe);
   } catch (e) {
@@ -89,6 +82,7 @@ const updatepatient = async (req, res) => {
 //ADD DOCTORS
 
 const addDoctor = async (req, res) => {
+  await createdoctorSchema.validateAsync(req.body) 
   try {
     const addDoctor = new Doctors({
       doctorName: req.body.doctorName,
@@ -131,11 +125,11 @@ const allDoctor = async (req, res) => {
     
     console.log(allDoctor)
     
-res.status(200).send(String(allDoctor)); // Use res.status(200) and convert alldoctor to a string before sending
+res.status(200).send(String(allDoctor));
 
   } catch (e) {
     console.log(e);
-    res.status(500).send(e); // Use res.status(500) for internal server error and send the error message
+    res.status(500).send(e); 
   }
 };
 
@@ -161,7 +155,7 @@ const updateDoctor = async (req, res) => {
   try {
     let _id = req.query.id;
     const getstdspe = await Doctors.findByIdAndUpdate(_id, req.body, {
-      new: true, //new updated value usi waqt mil jae uskay liye kia hay
+      new: true, 
     });
     res.send({
       success: true,
@@ -177,10 +171,10 @@ const updateDoctor = async (req, res) => {
 
 const verifySignup = async (req, res) => {
   try {
-    const addstaff = new staffs(req.body); //get information for staff
-    var encryptedPassword = await bcrypt.hash(addstaff.password, 10); //convert password in bcrpt form
-    addstaff.password = encryptedPassword; //converted
-    let insertstaff = await addstaff.save(); //then insert staff info then saved
+    const addstaff = new staffs(req.body); 
+    var encryptedPassword = await bcrypt.hash(addstaff.password, 10); 
+    addstaff.password = encryptedPassword; 
+    let insertstaff = await addstaff.save(); 
     const token = jwt.sign(
       {
         email: addstaff.email,
@@ -195,7 +189,6 @@ const verifySignup = async (req, res) => {
 
     let tokens = token;
     let helperfunction = () => {
-      // defined that sends a response back to the client with a status code of 201
       let response = res.statusCode;
       let messages = "Sign-up Successful";
       let status = true;
@@ -297,14 +290,14 @@ const uploadImage = async (file) => {
 
 const imageuser = async (req, res) => {
   try {
-    // Check if file was provided in request body
+    
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).send('No files were uploaded.');
     }
 
     const imageUrl = await uploadImage(req.files.photo);
 
-    // Save the image URL to the user's profile
+    
     const user = await User.findById(req.user.id);
     user.imageUrl = imageUrl;
     await user.save();
@@ -318,7 +311,7 @@ const imageuser = async (req, res) => {
 
 const uploadImageHandler = async (req, res) => {
   try {
-    // Check if file was provided in request body
+  
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).send('No files were uploaded.');
     }
@@ -326,7 +319,7 @@ const uploadImageHandler = async (req, res) => {
     const file = req.files.photo;
     const result = await cloudinary.uploader.upload(file.tempFilePath);
 
-    // Create a new image record in the database with the Cloudinary URL
+  
     const newImage = new Image({ imageUrl: result.secure_url });
     await newImage.save();
 
