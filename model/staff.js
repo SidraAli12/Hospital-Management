@@ -31,9 +31,12 @@ const staff_schema=new mongoose.Schema({
         require:true
     },
 
-    hospital_detail:{
+    /*hospital_detail:{
     type:String,
-    require:true
+    require:true*/
+    hospital_detail: {
+        hospital_id: Number,
+        hospital_name: String
 },
 qualification:{
 
