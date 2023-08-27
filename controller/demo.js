@@ -12,7 +12,8 @@ const bcrypt = require("bcryptjs");
 const cloudinary=require('cloudinary').v2
 var { ObjectId } = require("mongodb");
 const {createPatientSchema}=require("../validation/patient")
-const {createdoctorSchema}=require("../validation/doctor")
+const {createDoctorSchema}=require("../validation/doctor")
+const {createstaffSchema}=require("../validation/Staff.js")
 
 
 
@@ -82,7 +83,7 @@ const updatepatient = async (req, res) => {
 //ADD DOCTORS
 
 const addDoctor = async (req, res) => {
-  await createdoctorSchema.validateAsync(req.body) 
+  await createDoctorSchema.validateAsync(req.body) 
   try {
     const addDoctor = new Doctors({
       doctorName: req.body.doctorName,
@@ -94,14 +95,16 @@ const addDoctor = async (req, res) => {
     });
 
     let insertDoctor = await addDoctor.save();
-
-    const Message = {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    console.log(process.env.SENDGRID_API_KEY);
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+     const Message = {
       to: req.body.email,
       from: "sidrasamoon@gmail.com",
       subject: "hello from sendgrid",
-      templateId: "d-bef8b4bfdee1490a932fd2a3536dbf14",
+      templateId:"d-bef8b4bfdee1490a932fd2a3536dbf14",
       dynamicTemplateData: {
-        fullname: req.body.doctorName,
+        fullname:req.body.doctorName,
       },
     };
 
@@ -168,13 +171,26 @@ const updateDoctor = async (req, res) => {
   }
 };
 //verifysignup
-
 const verifySignup = async (req, res) => {
   try {
-    const addstaff = new staffs(req.body); 
-    var encryptedPassword = await bcrypt.hash(addstaff.password, 10); 
-    addstaff.password = encryptedPassword; 
-    let insertstaff = await addstaff.save(); 
+    await createstaffSchema.validateAsync(req.body);
+    
+    // Check if staff member with provided email exists
+    const existingStaff  = await staffs.findOne({ email: req.body.email });
+    if (existingStaff ) {
+      return res.status(400).send({
+        response: 400,
+        message: "Email already registered",
+        status: false,
+      });
+    }
+
+    const addstaff = new staffs(req.body);
+    var encryptedPassword = await bcrypt.hash(addstaff.password, 10);
+    addstaff.password = encryptedPassword;
+    let insertstaff = await addstaff.save();
+    
+    // Generate token
     const token = jwt.sign(
       {
         email: addstaff.email,
@@ -203,12 +219,35 @@ const verifySignup = async (req, res) => {
         });
     };
     helperfunction();
-  } catch (e) {
-    console.log(e);
-    res.status(400).send(e);
+  } catch (error) {
+    console.log("Error caught:", error);
+
+    if (error.isJoi) {
+      return res.status(400).send({
+        response: 400,
+        message: "Validation error",
+        status: false,
+        errors: error.details.map((err) => err.message),
+      });
+    }
+
+    // Other error handling for non-validation errors
+    if (error.name === "MongoError" && error.code === 11000) {
+      return res.status(400).send({
+        response: 400,
+        message: "Duplicate key error",
+        status: false,
+        errors: ["Email or phone number already exists"],
+      });
+    }
+
+    console.log(error);
+    res.status(500).send("Internal Server Error");
   }
 };
 
+
+    
 //Sign In
 const signIn = async (req, res) => {
   try {
